@@ -1,0 +1,5 @@
+{
+  "name": "Painel Administrativo de Pedidos",
+  "description": "Um painel administrativo completo para gerenciar produtos, pedidos e visualizar dashboards de vendas. Inclui funcionalidades específicas para diferentes níveis de acesso de usuários.",
+  "requestFramePermissions": []
+}
