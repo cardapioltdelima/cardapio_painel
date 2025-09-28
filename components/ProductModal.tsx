@@ -38,28 +38,39 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, categories, onClos
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        let imageUrl = product?.imageUrl || '';
+        let finalImageUrl = product?.imageUrl || '';
 
         if (imageFile) {
-            const fileName = `${Date.now()}_${imageFile.name}`;
-            const { data, error } = await supabase.storage
-                .from('products')
+            const sanitizedName = imageFile.name
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^\w\-.]/g, '');
+
+            const fileName = `${Date.now()}_${sanitizedName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('storage-produtos')
                 .upload(fileName, imageFile);
 
-            if (error) {
-                console.error('Error uploading image:', error);
-                // Handle error appropriately
+            if (uploadError) {
+                console.error('Error uploading image:', uploadError);
+                alert(`Erro no upload da imagem: ${uploadError.message}`);
                 return;
             }
 
-            const { publicURL } = supabase.storage.from('products').getPublicUrl(fileName).data;
-            imageUrl = publicURL;
+            const { data: urlData } = supabase.storage
+                .from('storage-produtos')
+                .getPublicUrl(fileName);
+            
+            finalImageUrl = urlData.publicUrl;
         }
 
         onSave({
             ...formData,
             id: product?.id || `new-${Date.now()}`,
-            imageUrl: imageUrl || `https://picsum.photos/seed/${formData.name}/400`
+            imageUrl: finalImageUrl || `https://picsum.photos/seed/${formData.name}/400`
         } as Product);
         onClose();
     };

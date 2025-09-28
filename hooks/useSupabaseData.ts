@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../utils/supabase';
 import { Product, Category, Order, OrderStatus, PaymentStatus, OrderItem, User, Role } from '../types';
@@ -223,38 +224,36 @@ export const useSupabaseData = () => {
 
     const saveProduct = useCallback(async (product: Product) => {
         try {
-            if (product.id && product.id !== 'new') {
-                // Atualizar produto existente
+            const productData: any = {
+                name: product.name,
+                price: product.price,
+                size: product.size || null,
+                unit: product.unit || null,
+                image_url: product.imageUrl
+            };
+
+            const categoryIdAsInt = parseInt(product.categoryId);
+            if (!isNaN(categoryIdAsInt)) {
+                productData.category_id = categoryIdAsInt;
+            }
+
+            if (product.id && !product.id.startsWith('new')) {
+                // Update
                 const { error } = await supabase
                     .from('products')
-                    .update({
-                        name: product.name,
-                        category_id: parseInt(product.categoryId),
-                        price: product.price,
-                        size: product.size || null,
-                        unit: product.unit || null,
-                        image_url: product.imageUrl
-                    })
+                    .update(productData)
                     .eq('id', parseInt(product.id as string));
                 
                 if (error) throw error;
             } else {
-                // Criar novo produto
+                // Insert
                 const { error } = await supabase
                     .from('products')
-                    .insert([{
-                        name: product.name,
-                        category_id: parseInt(product.categoryId),
-                        price: product.price,
-                        size: product.size || null,
-                        unit: product.unit || null,
-                        image_url: product.imageUrl
-                    }]);
+                    .insert([productData]);
                 
                 if (error) throw error;
             }
             
-            // Recarregar produtos
             await loadProducts();
         } catch (err) {
             console.error('Erro ao salvar produto:', err);

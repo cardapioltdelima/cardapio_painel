@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import UserIcon from './icons/UserIcon';
@@ -10,7 +9,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ currentView, toggleSidebar }) => {
-    const { currentUser, users, switchUser } = useAuth();
+    const { user, logout } = useAuth();
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -26,8 +25,8 @@ const Header: React.FC<HeaderProps> = ({ currentView, toggleSidebar }) => {
         };
     }, []);
 
-    const handleUserSwitch = (userId: number) => {
-        switchUser(userId);
+    const handleLogout = async () => {
+        await logout();
         setDropdownOpen(false);
     };
 
@@ -46,14 +45,9 @@ const Header: React.FC<HeaderProps> = ({ currentView, toggleSidebar }) => {
                     onClick={() => setDropdownOpen(!dropdownOpen)}
                     className="flex items-center space-x-2 focus:outline-none"
                 >
-                    <img
-                        className="h-10 w-10 rounded-full object-cover"
-                        src={currentUser?.avatar}
-                        alt="User avatar"
-                    />
+                    <UserIcon className="h-10 w-10 rounded-full object-cover p-2 bg-gray-200 dark:bg-gray-600" />
                     <div className='text-left hidden sm:block'>
-                        <span className="font-medium text-gray-800 dark:text-gray-200">{currentUser?.name}</span>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{currentUser?.role}</p>
+                        <span className="font-medium text-gray-800 dark:text-gray-200">{user?.email}</span>
                     </div>
                 </button>
 
@@ -61,21 +55,16 @@ const Header: React.FC<HeaderProps> = ({ currentView, toggleSidebar }) => {
                     <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-700 rounded-md shadow-lg overflow-hidden z-20">
                         <div className="py-2">
                             <div className="px-4 py-2">
-                                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{currentUser?.name}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{currentUser?.role}</p>
+                                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{user?.email}</p>
                             </div>
                             <div className="border-t border-gray-200 dark:border-gray-600"></div>
-                            <p className="px-4 pt-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Trocar Usuário</p>
-                            {users.map(user => (
-                                <button
-                                    key={user.id}
-                                    onClick={() => handleUserSwitch(user.id)}
-                                    className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
-                                >
-                                    <UserIcon className="w-4 h-4 mr-2" />
-                                    <span>{user.name} ({user.role})</span>
-                                </button>
-                            ))}
+                            <button
+                                onClick={handleLogout}
+                                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                            >
+                                <LogoutIcon className="w-4 h-4 mr-2" />
+                                <span>Sair</span>
+                            </button>
                         </div>
                     </div>
                 )}

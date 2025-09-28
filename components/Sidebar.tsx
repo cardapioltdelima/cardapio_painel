@@ -13,7 +13,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, isSidebarOpen, setSidebarOpen }) => {
-    const { isAdmin } = useAuth();
+    const { user } = useAuth();
 
     const navItems = [
         { id: 'dashboard', label: 'Dashboard', icon: DashboardIcon, adminOnly: false },
@@ -58,7 +58,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, isSideba
                 </div>
                 <nav className="flex-1 mt-6">
                     {navItems.map(item =>
-                        (!item.adminOnly || isAdmin) && <NavLink key={item.id} item={item} />
+                        <NavLink key={item.id} item={item} />
                     )}
                 </nav>
             </div>

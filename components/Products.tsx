@@ -1,8 +1,7 @@
-
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Product, Category } from '../types';
 import ProductModal from './ProductModal';
-import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaPlus, FaSearch } from 'react-icons/fa';
 
 interface ProductsProps {
     products: Product[];
@@ -14,6 +13,16 @@ interface ProductsProps {
 const Products: React.FC<ProductsProps> = ({ products, categories, saveProduct, deleteProduct }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredProducts = useMemo(() => {
+        if (!searchTerm) {
+            return products;
+        }
+        return products.filter(product =>
+            product.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [products, searchTerm]);
 
     const handleOpenModal = (product: Product | null = null) => {
         setEditingProduct(product);
@@ -31,20 +40,32 @@ const Products: React.FC<ProductsProps> = ({ products, categories, saveProduct, 
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-                <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4 sm:mb-0">Gerenciamento de Produtos</h2>
-                <button
-                    onClick={() => handleOpenModal()}
-                    className="flex items-center bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors shadow"
-                >
-                    <FaPlus className="mr-2" />
-                    <span className="whitespace-nowrap">Adicionar Produto</span>
-                </button>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">Gerenciamento de Produtos</h2>
+                <div className="flex items-center gap-4">
+                    <div className="relative">
+                        <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Pesquisar produtos..."
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                        />
+                    </div>
+                    <button
+                        onClick={() => handleOpenModal()}
+                        className="flex items-center bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors shadow whitespace-nowrap"
+                    >
+                        <FaPlus className="mr-2" />
+                        <span>Adicionar Produto</span>
+                    </button>
+                </div>
             </div>
 
             {/* Mobile Card View */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
-                {products.map(product => (
+                {filteredProducts.map(product => (
                     <div key={product.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg shadow p-4 space-y-3">
                         <img src={product.imageUrl} alt={product.name} className="w-full h-32 object-cover rounded-md mb-2" />
                         <div className="flex justify-between items-start">
@@ -81,7 +102,7 @@ const Products: React.FC<ProductsProps> = ({ products, categories, saveProduct, 
                         </tr>
                     </thead>
                     <tbody>
-                        {products.map(product => (
+                        {filteredProducts.map(product => (
                             <tr key={product.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                                 <td className="px-6 py-4">
                                     <img src={product.imageUrl} alt={product.name} className="w-12 h-12 object-cover rounded-md" />
@@ -104,7 +125,7 @@ const Products: React.FC<ProductsProps> = ({ products, categories, saveProduct, 
                 </table>
             </div>
 
-            {products.length === 0 && <p className="text-center py-8 text-gray-500">Nenhum produto encontrado.</p>}
+            {filteredProducts.length === 0 && <p className="text-center py-8 text-gray-500">Nenhum produto encontrado.</p>}
 
             {isModalOpen && (
                 <ProductModal
