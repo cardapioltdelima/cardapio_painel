@@ -85,6 +85,13 @@ const Orders: React.FC<OrdersProps> = ({ orders, products, updateOrderStatus, up
                             <p className="text-sm text-gray-600 dark:text-gray-300">Cliente: <span className="font-medium text-gray-800 dark:text-gray-100">{order.customer.name}</span></p>
                             <p className="text-sm text-gray-600 dark:text-gray-300">Data: <span className="font-medium text-gray-800 dark:text-gray-100">{new Date(order.createdAt).toLocaleDateString('pt-BR')}</span></p>
                             <p className="text-sm text-gray-600 dark:text-gray-300">Total: <span className="font-medium text-gray-800 dark:text-gray-100">{order.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span></p>
+                            {order.data_agendamento && (
+                                <>
+                                    <p className="text-sm text-gray-600 dark:text-gray-300">Data Agendada: <span className="font-medium text-gray-800 dark:text-gray-100">{new Date(order.data_agendamento).toLocaleDateString('pt-BR')}</span></p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-300">Turno: <span className="font-medium text-gray-800 dark:text-gray-100">{order.turno}</span></p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-300">Horário: <span className="font-medium text-gray-800 dark:text-gray-100">{order.horario_agendamento}</span></p>
+                                </>
+                            )}
                         </div>
                         <div className="flex items-center justify-end space-x-4 pt-2">
                             <a
@@ -112,6 +119,9 @@ const Orders: React.FC<OrdersProps> = ({ orders, products, updateOrderStatus, up
                             <th scope="col" className="px-6 py-3">Pedido</th>
                             <th scope="col" className="px-6 py-3">Cliente</th>
                             <th scope="col" className="px-6 py-3">Data</th>
+                            <th scope="col" className="px-6 py-3">Data Agendada</th>
+                            <th scope="col" className="px-6 py-3">Turno</th>
+                            <th scope="col" className="px-6 py-3">Horário</th>
                             <th scope="col" className="px-6 py-3">Total</th>
                             <th scope="col" className="px-6 py-3">Status Pedido</th>
                             <th scope="col" className="px-6 py-3">Status Pgto.</th>
@@ -124,6 +134,9 @@ const Orders: React.FC<OrdersProps> = ({ orders, products, updateOrderStatus, up
                                 <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">#{order.id.slice(-6)}</td>
                                 <td className="px-6 py-4">{order.customer.name}</td>
                                 <td className="px-6 py-4">{new Date(order.createdAt).toLocaleDateString('pt-BR')}</td>
+                                <td className="px-6 py-4">{order.data_agendamento ? new Date(order.data_agendamento).toLocaleDateString('pt-BR') : 'N/A'}</td>
+                                <td className="px-6 py-4">{order.turno || 'N/A'}</td>
+                                <td className="px-6 py-4">{order.horario_agendamento || 'N/A'}</td>
                                 <td className="px-6 py-4">{order.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
                                 <td className="px-6 py-4">
                                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
@@ -168,4 +181,4 @@ const Orders: React.FC<OrdersProps> = ({ orders, products, updateOrderStatus, up
     );
 };
 
-export default Orders;
+export { Orders };

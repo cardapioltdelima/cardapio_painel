@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Order, OrderStatus, PaymentStatus } from '../types';
-import { FaWhatsapp, FaUser, FaMapMarkerAlt, FaTimes } from 'react-icons/fa';
+import { FaWhatsapp, FaUser, FaMapMarkerAlt, FaTimes, FaCalendarAlt, FaClock } from 'react-icons/fa';
 
 interface OrderDetailsModalProps {
     order: Order;
@@ -57,6 +57,21 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
                             <span>{order.customer.whatsapp}</span>
                         </a>
                     </div>
+
+                    {/* Scheduling Info */}
+                    {order.data_agendamento && (
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Informações de Agendamento</h3>
+                            <div className="flex items-center space-x-3 text-gray-600 dark:text-gray-300">
+                                <FaCalendarAlt className="text-purple-500"/>
+                                <span>{new Date(order.data_agendamento).toLocaleDateString('pt-BR')}</span>
+                            </div>
+                            <div className="flex items-center space-x-3 text-gray-600 dark:text-gray-300">
+                                <FaClock className="text-purple-500"/>
+                                <span>{order.turno} - {order.horario_agendamento}</span>
+                            </div>
+                        </div>
+                    )}
                     
                     {/* Order Items */}
                     <div>
