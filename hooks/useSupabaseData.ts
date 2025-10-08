@@ -72,7 +72,7 @@ export const useSupabaseData = () => {
         try {
             const { data, error } = await supabase
                 .from('orders')
-                .select('id, customer_name, customer_whatsapp, delivery_address, status, payment_status, subtotal, created_at')
+                .select('id, customer_name, customer_whatsapp, delivery_address, status, payment_status, subtotal, created_at, data_agendamento, turno, horario_agendamento')
                 .order('created_at', { ascending: false });
             
             if (error) throw error;
@@ -120,7 +120,10 @@ export const useSupabaseData = () => {
                         status: order.status as OrderStatus,
                         payment_status: order.payment_status as PaymentStatus || PaymentStatus.Pendente,
                         total: parseFloat(order.subtotal),
-                        createdAt: orderDate
+                        createdAt: orderDate,
+                        data_agendamento: order.data_agendamento,
+                        turno: order.turno,
+                        horario_agendamento: order.horario_agendamento
                     };
                 });
                 
