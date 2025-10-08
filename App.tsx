@@ -4,7 +4,7 @@ import Login from './components/Login';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
-import Orders from './components/Orders';
+import { Orders } from './components/Orders';
 import Products from './components/Products';
 import { useSupabaseData } from './hooks/useSupabaseData';
 

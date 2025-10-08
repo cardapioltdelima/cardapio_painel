@@ -30,6 +30,12 @@ export interface OrderItem {
   quantity: number;
   price: number;
 }
+export enum TurnosEntrega {
+  Manha = 'manha',
+  Tarde = 'tarde',
+  Noite = 'noite',
+}
+
 export interface Order {
   id: string;
   customer: {
@@ -42,6 +48,9 @@ export interface Order {
   payment_status: PaymentStatus;
   total: number;
   createdAt: Date;
+  data_agendamento: string | null;
+  turno: TurnosEntrega | null;
+  horario_agendamento: string | null;
 }
 
 export interface Product {
