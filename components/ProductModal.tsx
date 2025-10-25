@@ -1,5 +1,5 @@
 
-import React, { useState, FormEvent } from 'react';
+import React, { useState, FormEvent, ChangeEvent } from 'react';
 import { Product, Category } from '../types';
 import { supabase } from '../utils/supabase';
 
@@ -9,6 +9,32 @@ interface ProductModalProps {
     onClose: () => void;
     onSave: (product: Product) => void;
 }
+
+// Definindo o InputField fora do componente principal para evitar recriações
+interface InputFieldProps {
+    name: string;
+    label: string;
+    value: string | number;
+    onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+    type?: string;
+    required?: boolean;
+}
+
+const InputField: React.FC<InputFieldProps> = ({ name, label, value, onChange, type = 'text', required = true }) => (
+    <div>
+        <label htmlFor={name} className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{label}</label>
+        <input
+            type={type}
+            name={name}
+            id={name}
+            value={value}
+            onChange={onChange}
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+            required={required}
+            step={type === 'number' ? '0.01' : undefined}
+        />
+    </div>
+);
 
 const ProductModal: React.FC<ProductModalProps> = ({ product, categories, onClose, onSave }) => {
     const [formData, setFormData] = useState<Omit<Product, 'id' | 'imageUrl' > & {id?: string, imageUrl?: string}>(
@@ -75,28 +101,12 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, categories, onClos
         onClose();
     };
 
-    const InputField: React.FC<{name: keyof typeof formData, label: string, type?: string, required?: boolean}> = ({ name, label, type='text', required=true}) => (
-        <div>
-            <label htmlFor={name} className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{label}</label>
-            <input
-                type={type}
-                name={name}
-                id={name}
-                value={formData[name] as string || ''}
-                onChange={handleChange}
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                required={required}
-                step={type === 'number' ? '0.01' : undefined}
-            />
-        </div>
-    );
-
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-center" onClick={onClose}>
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md m-4" onClick={e => e.stopPropagation()}>
                 <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">{product ? 'Editar Produto' : 'Adicionar Produto'}</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <InputField name="name" label="Nome do Produto" />
+                    <InputField name="name" label="Nome do Produto" value={formData.name} onChange={handleChange} />
                     <div>
                         <label htmlFor="categoryId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Categoria</label>
                         <select name="categoryId" id="categoryId" value={formData.categoryId} onChange={handleChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
@@ -104,10 +114,10 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, categories, onClos
                         </select>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <InputField name="price" label="Preço" type="number" />
-                        <InputField name="size" label="Tamanho" />
+                        <InputField name="price" label="Preço" type="number" value={formData.price} onChange={handleChange} />
+                        <InputField name="size" label="Tamanho" value={formData.size} onChange={handleChange} />
                     </div>
-                     <InputField name="unit" label="Unidade (ex: un, kg, 100 un)" />
+                     <InputField name="unit" label="Unidade (ex: un, kg, 100 un)" value={formData.unit} onChange={handleChange} />
                      <div>
                         <label htmlFor="image" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Imagem do Produto</label>
                         <input

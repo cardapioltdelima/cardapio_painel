@@ -1,11 +1,15 @@
 
 .receipt-container {
-    display: none; /* Oculto por padrão */
+    position: absolute; /* Posiciona fora da tela em vez de usar display: none */
+    left: -9999px;
+    top: -9999px;
     font-family: 'Courier New', Courier, monospace;
     width: 300px;
     margin: 0 auto;
     padding: 10px;
     border: 1px solid #ccc;
+    background-color: white; /* Garante fundo branco na impressão */
+    color: black; /* Garante texto preto na impressão */
 }
 
 .receipt-header h2 {
@@ -51,6 +55,5 @@
         top: 0;
         width: 100%;
         border: none;
-        display: block !important; /* Garante que seja exibido ao imprimir */
     }
 }
