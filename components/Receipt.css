@@ -38,6 +38,18 @@
     margin-top: 20px;
 }
 
+/* Preview em tela (mobile/tablet) */
+.receipt-overlay .receipt-container {
+    display: block;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 12px;
+    border: 1px solid #ccc;
+    background-color: white;
+    color: black;
+}
+
 @media print {
     body * {
         visibility: hidden;

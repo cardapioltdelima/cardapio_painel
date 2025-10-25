@@ -30,10 +30,23 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
 
     const handlePrint = () => {
         setIsPrinting(true);
-        setTimeout(() => {
-            window.print();
-            setIsPrinting(false);
-        }, 100);
+        const isSmallScreen = window.matchMedia('(max-width: 768px)').matches;
+        if (!isSmallScreen) {
+            // Desktop: open print dialog and close preview automatically
+            setTimeout(() => {
+                window.print();
+                setIsPrinting(false);
+            }, 100);
+        } else {
+            // Mobile/Tablet: open print dialog but keep preview visible until user closes
+            setTimeout(() => {
+                try {
+                    window.print();
+                } catch (e) {
+                    // Some mobile browsers may not support print; keep preview open
+                }
+            }, 100);
+        }
     };
 
     const handleShareWhatsApp = () => {
@@ -186,7 +199,17 @@ Obrigado pela sua preferência!
                     </div>
                 </div>
             </div>
-            {isPrinting && <Receipt order={order} />}
+            {isPrinting && (
+                <div className="receipt-overlay fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-start overflow-y-auto py-4" onClick={() => setIsPrinting(false)}>
+                    <div onClick={(e) => e.stopPropagation()} className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-4 sm:p-6 w-full max-w-md m-4">
+                        <Receipt order={order} />
+                        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <button onClick={() => setIsPrinting(false)} className="w-full px-4 py-2 bg-gray-200 text-gray-800 rounded-lg">Fechar</button>
+                            <button onClick={() => window.print()} className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg">Imprimir</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 };
