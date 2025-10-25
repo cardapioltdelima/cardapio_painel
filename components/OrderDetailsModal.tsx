@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Order, OrderStatus, PaymentStatus } from '../types';
-import { FaWhatsapp, FaUser, FaMapMarkerAlt, FaTimes, FaCalendarAlt, FaClock } from 'react-icons/fa';
+import { FaWhatsapp, FaUser, FaMapMarkerAlt, FaTimes, FaCalendarAlt, FaClock, FaShare } from 'react-icons/fa';
 import Receipt from './Receipt';
 import './Receipt.css';
 
@@ -34,6 +34,27 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
             window.print();
             setIsPrinting(false);
         }, 100);
+    };
+
+    const handleShareWhatsApp = () => {
+        const itemsText = order.items.map(item => 
+            `${item.quantity}x ${item.productName} - ${(item.quantity * item.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`
+        ).join('\n');
+
+        const message = `
+*Olá, ${order.customer.name}!*
+
+Segue o comprovante do seu pedido *#${order.id.slice(-6)}*:
+-----------------------------------
+${itemsText}
+-----------------------------------
+*Total: ${order.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}*
+
+Obrigado pela sua preferência!
+        `;
+
+        const whatsappUrl = `https://wa.me/${order.customer.whatsapp}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
     };
 
     return (
@@ -155,6 +176,12 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
                             className="w-full sm:w-auto px-6 py-2.5 bg-gray-500 text-white font-bold rounded-lg hover:bg-gray-600 transition-colors"
                         >
                             Imprimir Recibo
+                        </button>
+                        <button 
+                            onClick={handleShareWhatsApp}
+                            className="w-full sm:w-auto px-6 py-2.5 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                        >
+                            <FaShare /> Compartilhar
                         </button>
                     </div>
                 </div>

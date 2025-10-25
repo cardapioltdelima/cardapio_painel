@@ -1,8 +1,6 @@
 
 .receipt-container {
-    position: absolute; /* Posiciona fora da tela em vez de usar display: none */
-    left: -9999px;
-    top: -9999px;
+    display: none;
     font-family: 'Courier New', Courier, monospace;
     width: 300px;
     margin: 0 auto;
@@ -50,6 +48,7 @@
     }
 
     .receipt-container {
+        display: block; /* Garante que o recibo seja exibido ao imprimir */
         position: absolute;
         left: 0;
         top: 0;
