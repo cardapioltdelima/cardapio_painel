@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { Order, OrderStatus, PaymentStatus } from '../types';
 import { FaWhatsapp, FaUser, FaMapMarkerAlt, FaTimes, FaCalendarAlt, FaClock, FaShare } from 'react-icons/fa';
-import Receipt from './Receipt';
-import './Receipt.css';
+// import Receipt from './Receipt';
+// import './Receipt.css';
 
 interface OrderDetailsModalProps {
     order: Order;
@@ -16,7 +16,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
 
     const [currentStatus, setCurrentStatus] = useState(order.status);
     const [currentPaymentStatus, setCurrentPaymentStatus] = useState(order.payment_status);
-    const [isPrinting, setIsPrinting] = useState(false);
+    // const [isPrinting, setIsPrinting] = useState(false);
 
     const handleSave = () => {
         if (currentStatus !== order.status) {
@@ -28,24 +28,87 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
         onClose(); // Close modal after saving
     };
 
+    const generateReceiptHtml = (order: Order) => {
+        const itemsRows = order.items.map(item => `
+            <tr>
+                <td>${item.quantity}</td>
+                <td>${item.productName}</td>
+                <td>${item.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+                <td>${(item.quantity * item.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+            </tr>
+        `).join('');
+
+        return `<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Recibo Pedido #${order.id.slice(-6)}</title>
+    <style>
+        body { font-family: 'Courier New', Courier, monospace; margin: 0; padding: 16px; color: #000; background: #fff; }
+        .header { text-align: center; margin-bottom: 10px; }
+        .header h2 { margin: 0 0 4px; font-size: 18px; }
+        .header p { margin: 0; font-size: 14px; }
+        .customer { margin-bottom: 8px; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border-bottom: 1px dotted #ccc; padding: 4px 0; text-align: left; font-size: 13px; }
+        .total { margin-top: 8px; text-align: right; font-weight: bold; font-size: 15px; }
+        .footer { text-align: center; margin-top: 16px; font-size: 13px; }
+        @page { margin: 12mm; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Recibo</h2>
+        <p>Pedido #${order.id.slice(-6)}</p>
+    </div>
+    <div class="customer">
+        <p><strong>Cliente:</strong> ${order.customer.name}</p>
+        <p><strong>Endereço:</strong> ${order.customer.address}</p>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Qtd</th>
+                <th>Produto</th>
+                <th>Preço Unit.</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${itemsRows}
+        </tbody>
+    </table>
+    <div class="total">
+        <p>Total a Pagar: ${order.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+    </div>
+    <div class="footer">
+        <p>Obrigado pela sua preferência!</p>
+    </div>
+</body>
+</html>`;
+    };
+
     const handlePrint = () => {
-        setIsPrinting(true);
-        const isSmallScreen = window.matchMedia('(max-width: 768px)').matches;
-        if (!isSmallScreen) {
-            // Desktop: open print dialog and close preview automatically
-            setTimeout(() => {
-                window.print();
-                setIsPrinting(false);
-            }, 100);
-        } else {
-            // Mobile/Tablet: open print dialog but keep preview visible until user closes
+        const html = generateReceiptHtml(order);
+        const printWindow = window.open('', '_blank', 'noopener,noreferrer,width=420,height=700');
+        if (printWindow) {
+            printWindow.document.open();
+            printWindow.document.write(html);
+            printWindow.document.close();
             setTimeout(() => {
                 try {
-                    window.print();
+                    printWindow.focus();
+                    printWindow.print();
                 } catch (e) {
-                    // Some mobile browsers may not support print; keep preview open
+                    // Alguns navegadores móveis podem precisar interação do usuário
                 }
-            }, 100);
+                setTimeout(() => {
+                    try { printWindow.close(); } catch (e) {}
+                }, 500);
+            }, 200);
+        } else {
+            alert('Não foi possível abrir a janela de impressão. Verifique se o navegador está bloqueando pop-ups.');
         }
     };
 
@@ -72,7 +135,7 @@ Obrigado pela sua preferência!
 
     return (
         <>
-            <div className={`fixed inset-0 bg-black bg-opacity-60 z-40 flex justify-center items-start overflow-y-auto py-4 ${isPrinting ? 'printing' : ''}`} onClick={onClose}>
+            <div className={`fixed inset-0 bg-black bg-opacity-60 z-40 flex justify-center items-start overflow-y-auto py-4`} onClick={onClose}>
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-4 sm:p-6 w-full max-w-2xl m-4 transform transition-all" onClick={e => e.stopPropagation()}>
                     <div className="flex justify-between items-center border-b pb-3 mb-4 dark:border-gray-600">
                         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Detalhes do Pedido #{order.id.slice(-6)}</h2>
@@ -199,17 +262,7 @@ Obrigado pela sua preferência!
                     </div>
                 </div>
             </div>
-            {isPrinting && (
-                <div className="receipt-overlay fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-start overflow-y-auto py-4" onClick={() => setIsPrinting(false)}>
-                    <div onClick={(e) => e.stopPropagation()} className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-4 sm:p-6 w-full max-w-md m-4">
-                        <Receipt order={order} />
-                        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <button onClick={() => setIsPrinting(false)} className="w-full px-4 py-2 bg-gray-200 text-gray-800 rounded-lg">Fechar</button>
-                            <button onClick={() => window.print()} className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg">Imprimir</button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Pré-visualização e impressão ocorrem em nova janela para evitar conflitos de visibilidade no tablet */}
         </>
     );
 };

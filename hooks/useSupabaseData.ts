@@ -232,7 +232,7 @@ export const useSupabaseData = () => {
                 price: product.price,
                 size: product.size || null,
                 unit: product.unit || null,
-                image_url: product.imageUrl
+                image_url: product.imageUrl,
             };
 
             const categoryIdAsInt = parseInt(product.categoryId);
@@ -242,27 +242,55 @@ export const useSupabaseData = () => {
 
             if (product.id && !product.id.startsWith('new')) {
                 // Update
-                const { error } = await supabase
+                const { data, error } = await supabase
                     .from('products')
                     .update(productData)
-                    .eq('id', parseInt(product.id as string));
-                
+                    .eq('id', parseInt(product.id as string))
+                    .select()
+                    .single();
+
                 if (error) throw error;
+
+                if (data) {
+                    const updatedProduct: Product = {
+                        id: data.id.toString(),
+                        name: data.name,
+                        categoryId: data.category_id ? data.category_id.toString() : '',
+                        price: parseFloat(data.price),
+                        size: data.size || '',
+                        unit: data.unit || '',
+                        imageUrl: data.image_url || `https://picsum.photos/seed/${data.name}/400`
+                    };
+                    setProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+                }
             } else {
                 // Insert
-                const { error } = await supabase
+                const { data, error } = await supabase
                     .from('products')
-                    .insert([productData]);
-                
+                    .insert([productData])
+                    .select()
+                    .single();
+
                 if (error) throw error;
+
+                if (data) {
+                    const newProduct: Product = {
+                        id: data.id.toString(),
+                        name: data.name,
+                        categoryId: data.category_id ? data.category_id.toString() : '',
+                        price: parseFloat(data.price),
+                        size: data.size || '',
+                        unit: data.unit || '',
+                        imageUrl: data.image_url || `https://picsum.photos/seed/${data.name}/400`
+                    };
+                    setProducts(prev => [...prev, newProduct].sort((a, b) => a.name.localeCompare(b.name)));
+                }
             }
-            
-            await loadProducts();
         } catch (err) {
             console.error('Erro ao salvar produto:', err);
             setError(`Erro ao salvar produto: ${(err as Error).message}`);
-        } 
-    }, [loadProducts]);
+        }
+    }, []);
 
     const deleteProduct = useCallback(async (productId: string) => {
         try {
