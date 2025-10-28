@@ -9,7 +9,7 @@ interface ReceiptProps {
 
 const Receipt: React.FC<ReceiptProps> = ({ order }) => {
     return (
-        <div className="receipt-container">
+        <div id="receipt" className="receipt-container">
             <div className="receipt-header">
                 <h2>Recibo</h2>
                 <p>Pedido #{order.id.slice(-6)}</p>

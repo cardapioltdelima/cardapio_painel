@@ -39,15 +39,19 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
         };
     }, []);
 
-    const handlePrint = () => {
+    const handlePrint = async () => {
         setIsPrinting(true);
-        setTimeout(() => {
-            try {
-                window.print();
-            } catch (e) {
-                // Em alguns navegadores móveis, window.print pode falhar; mantém a visualização.
+        try {
+            // Aguarda fontes e layout estabilizarem (ajuda no Android/Tablet)
+            if ((document as any).fonts && (document as any).fonts.ready) {
+                await (document as any).fonts.ready;
             }
-        }, 100);
+            await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+            await new Promise<void>(r => setTimeout(() => r(), 200));
+            window.print();
+        } catch (e) {
+            // Em alguns navegadores móveis, window.print pode falhar; mantém a visualização.
+        }
     };
 
     const handleShareWhatsApp = () => {
@@ -210,6 +214,10 @@ Obrigado pela sua preferência!
                         </div>
                     </div>
                 </div>
+            )}
+            {/* Cópia apenas para impressão (fora do overlay) */}
+            {isPrinting && (
+                <Receipt order={order} />
             )}
         </>
     );

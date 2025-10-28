@@ -51,26 +51,33 @@
 }
 
 @media print {
-    body * {
-        visibility: hidden;
-    }
+    html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
-    .receipt-container, .receipt-container * {
-        visibility: visible;
-    }
+    /* Esconde todo o resto */
+    body * { visibility: hidden !important; }
 
-    .receipt-container {
+    /* Mostra APENAS o recibo */
+    #receipt, #receipt * { visibility: visible !important; }
+
+    /* Evita bugs com fixed/transform/filter/opacity */
+    #receipt {
         display: block !important;
         position: static !important;
-        width: 100%;
-        border: none;
+        width: 100% !important;
+        border: none !important;
         transform: none !important;
         filter: none !important;
         opacity: 1 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        left: auto !important;
+        top: auto !important;
     }
 
-    .modal-backdrop, .overlay {
+    /* Evita interferência do overlay/backdrop na impressão */
+    .receipt-overlay, .modal-backdrop, .overlay {
         display: none !important;
+        visibility: hidden !important;
     }
 }
 
