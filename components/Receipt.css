@@ -60,11 +60,23 @@
     }
 
     .receipt-container {
-        display: block; /* Garante que o recibo seja exibido ao imprimir */
-        position: absolute;
-        left: 0;
-        top: 0;
+        display: block !important;
+        position: static !important;
         width: 100%;
         border: none;
+        transform: none !important;
+        filter: none !important;
+        opacity: 1 !important;
+    }
+
+    .modal-backdrop, .overlay {
+        display: none !important;
+    }
+}
+
+/* Estilos para Tablet (ex: Samsung S10 Lite) */
+@media (min-width: 421px) and (max-width: 768px) {
+    .receipt-overlay .receipt-container {
+        max-width: 90%; 
     }
 }
