@@ -61,6 +61,59 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
         }
     };
 
+    // Impressão em nova janela (compatibilidade Android/Samsung Internet)
+    const openPrintWindowFromReceipt = async () => {
+        try {
+            const node = document.getElementById('receipt');
+            let html = '';
+            if (node) {
+                html = node.outerHTML;
+            } else {
+                // Se por algum motivo não estiver montado, monta e aguarda um frame
+                setIsPrinting(true);
+                await new Promise<void>(r => requestAnimationFrame(() => r()));
+                const fallbackNode = document.getElementById('receipt');
+                html = fallbackNode ? fallbackNode.outerHTML : '';
+            }
+
+            const w = window.open('', '_blank', 'noopener,noreferrer,width=420,height=720');
+            if (!w) return; // bloqueado por popup? usuário pode permitir
+
+            w.document.write(`
+                <html>
+                  <head>
+                    <meta name="viewport" content="width=device-width, initial-scale=1" />
+                    <title>Recibo #${order.id.slice(-6)}</title>
+                    <style>
+                      @page { size: A4; margin: 12mm; }
+                      html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                      body { font-family: system-ui, Arial, sans-serif; margin: 0; }
+                      * { box-sizing: border-box; }
+                      .receipt-container { display: block; font-family: 'Courier New', Courier, monospace; width: 100%; margin: 0; padding: 0; border: none; background: white; color: black; }
+                      .receipt-header h2 { text-align: center; font-size: 1.2em; margin-bottom: 10px; }
+                      .receipt-body table { width: 100%; border-collapse: collapse; }
+                      .receipt-body th, .receipt-body td { border-bottom: 1px dotted #ccc; padding: 5px 0; text-align: left; }
+                      .receipt-total { margin-top: 10px; text-align: right; }
+                      .receipt-footer { text-align: center; margin-top: 20px; }
+                    </style>
+                  </head>
+                  <body>
+                    ${html}
+                    <script>
+                      (async function() {
+                        try { if (document.fonts && document.fonts.ready) { await document.fonts.ready; } } catch(e){}
+                        requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
+                      })();
+                    <\/script>
+                  </body>
+                </html>
+            `);
+            w.document.close();
+        } catch (e) {
+            // Se falhar, o usuário pode tentar o botão de imprimir normal
+        }
+    };
+
     const handleShareWhatsApp = () => {
         const itemsText = order.items.map(item => 
             `${item.quantity}x ${item.productName} - ${(item.quantity * item.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`
@@ -222,6 +275,7 @@ Obrigado pela sua preferência!
                                     window.print();
                                 } catch (e) {}
                             }} className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg">Imprimir</button>
+                            <button onClick={openPrintWindowFromReceipt} className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg">Imprimir (Compatibilidade PDF)</button>
                         </div>
                     </div>
                 </div>
