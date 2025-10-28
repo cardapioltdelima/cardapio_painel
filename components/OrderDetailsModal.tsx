@@ -40,17 +40,24 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
     }, []);
 
     const handlePrint = async () => {
+        const isSmallScreen = window.matchMedia('(max-width: 480px)').matches; // celular
         setIsPrinting(true);
+
+        // Em celular, não chamar print automaticamente para manter o gesto do usuário.
+        if (isSmallScreen) {
+            return; // usuário tocará no botão "Imprimir" dentro do overlay
+        }
+
+        // Em tablet/desktop, chamar print com buffer para fontes/layout
         try {
-            // Aguarda fontes e layout estabilizarem (ajuda no Android/Tablet)
             if ((document as any).fonts && (document as any).fonts.ready) {
                 await (document as any).fonts.ready;
             }
             await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
-            await new Promise<void>(r => setTimeout(() => r(), 200));
+            await new Promise<void>(r => setTimeout(() => r(), 250));
             window.print();
         } catch (e) {
-            // Em alguns navegadores móveis, window.print pode falhar; mantém a visualização.
+            // Se window.print falhar, mantém a visualização para o usuário tentar manualmente.
         }
     };
 
@@ -210,7 +217,11 @@ Obrigado pela sua preferência!
                         <Receipt order={order} />
                         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <button onClick={() => setIsPrinting(false)} className="w-full px-4 py-2 bg-gray-200 text-gray-800 rounded-lg">Fechar</button>
-                            <button onClick={() => window.print()} className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg">Imprimir</button>
+                            <button onClick={() => {
+                                try {
+                                    window.print();
+                                } catch (e) {}
+                            }} className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg">Imprimir</button>
                         </div>
                     </div>
                 </div>
