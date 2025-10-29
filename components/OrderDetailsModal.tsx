@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Order, OrderStatus, PaymentStatus } from '../types';
 import { FaWhatsapp, FaUser, FaMapMarkerAlt, FaTimes, FaCalendarAlt, FaClock, FaShare } from 'react-icons/fa';
@@ -17,6 +16,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
     const [currentStatus, setCurrentStatus] = useState(order.status);
     const [currentPaymentStatus, setCurrentPaymentStatus] = useState(order.payment_status);
     const [isPrinting, setIsPrinting] = useState(false);
+    const [printFormat, setPrintFormat] = useState<'A4' | '80mm'>('A4');
 
     const handleSave = () => {
         if (currentStatus !== order.status) {
@@ -30,7 +30,12 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
 
     useEffect(() => {
         const handleBeforePrint = () => setIsPrinting(true);
-        const handleAfterPrint = () => setIsPrinting(false);
+        const handleAfterPrint = () => {
+            setIsPrinting(false);
+            // Remove estilo dinâmico após imprimir
+            const style = document.getElementById('dynamic-print-style');
+            if (style && style.parentNode) style.parentNode.removeChild(style);
+        };
         window.addEventListener('beforeprint', handleBeforePrint);
         window.addEventListener('afterprint', handleAfterPrint);
         return () => {
@@ -39,80 +44,124 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
         };
     }, []);
 
-    const handlePrint = async () => {
-        const isSmallScreen = window.matchMedia('(max-width: 480px)').matches; // celular
-        setIsPrinting(true);
-
-        // Em celular, não chamar print automaticamente para manter o gesto do usuário.
-        if (isSmallScreen) {
-            return; // usuário tocará no botão "Imprimir" dentro do overlay
+    const applyPrintFormatStyle = (format: 'A4' | '80mm') => {
+        // Remove anterior se existir
+        const prev = document.getElementById('dynamic-print-style');
+        if (prev && prev.parentNode) prev.parentNode.removeChild(prev);
+        const style = document.createElement('style');
+        style.id = 'dynamic-print-style';
+        style.type = 'text/css';
+        if (format === '80mm') {
+            style.innerHTML = `
+                @page { size: 80mm auto; margin: 0; }
+                @media print {
+                  body { margin: 0 !important; }
+                  #receipt-to-print { width: 80mm !important; max-width: 80mm !important; margin: 0 auto !important; }
+                }
+            `;
+        } else {
+            style.innerHTML = `
+                @page { size: A4; margin: 12mm; }
+                @media print {
+                  #receipt-to-print { width: auto !important; max-width: 100% !important; margin: 0 auto !important; }
+                }
+            `;
         }
+        document.head.appendChild(style);
+    };
 
-        // Em tablet/desktop, chamar print com buffer para fontes/layout
+    const handlePrint = async () => {
+        // Monta estilo dinâmico do formato escolhido (A4/80mm)
+        applyPrintFormatStyle(printFormat);
+
+        // Aguarda fontes e layout
         try {
             if ((document as any).fonts && (document as any).fonts.ready) {
                 await (document as any).fonts.ready;
             }
-            await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
-            await new Promise<void>(r => setTimeout(() => r(), 250));
-            window.print();
-        } catch (e) {
-            // Se window.print falhar, mantém a visualização para o usuário tentar manualmente.
-        }
+        } catch {}
+        await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+        await new Promise<void>(r => setTimeout(() => r(), 150));
+
+        // Chama impressão sem substituir o body (evita página em branco no desktop)
+        window.print();
     };
 
-    // Impressão em nova janela (compatibilidade Android/Samsung Internet)
-    const openPrintWindowFromReceipt = async () => {
-        try {
-            const node = document.getElementById('receipt');
-            let html = '';
-            if (node) {
-                html = node.outerHTML;
-            } else {
-                // Se por algum motivo não estiver montado, monta e aguarda um frame
-                setIsPrinting(true);
-                await new Promise<void>(r => requestAnimationFrame(() => r()));
-                const fallbackNode = document.getElementById('receipt');
-                html = fallbackNode ? fallbackNode.outerHTML : '';
-            }
+    // Fallback: imprimir em nova janela (isola CSS/HTML e evita interferência do DOM atual)
+    const handlePrintNewWindow = () => {
+        const win = window.open('', '_blank');
+        if (!win) return;
 
-            const w = window.open('', '_blank', 'noopener,noreferrer,width=420,height=720');
-            if (!w) return; // bloqueado por popup? usuário pode permitir
+        const currency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const itemsRows = order.items.map(item => `
+            <tr>
+              <td style="padding:4px;border-bottom:1px dotted #ccc">${item.quantity}</td>
+              <td style="padding:4px;border-bottom:1px dotted #ccc">${item.productName}</td>
+              <td style="padding:4px;border-bottom:1px dotted #ccc;text-align:right">${currency(item.price)}</td>
+              <td style="padding:4px;border-bottom:1px dotted #ccc;text-align:right">${currency(item.quantity * item.price)}</td>
+            </tr>
+        `).join('');
 
-            w.document.write(`
-                <html>
-                  <head>
-                    <meta name="viewport" content="width=device-width, initial-scale=1" />
-                    <title>Recibo #${order.id.slice(-6)}</title>
-                    <style>
-                      @page { size: A4; margin: 12mm; }
-                      html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                      body { font-family: system-ui, Arial, sans-serif; margin: 0; }
-                      * { box-sizing: border-box; }
-                      .receipt-container { display: block; font-family: 'Courier New', Courier, monospace; width: 100%; margin: 0; padding: 0; border: none; background: white; color: black; }
-                      .receipt-header h2 { text-align: center; font-size: 1.2em; margin-bottom: 10px; }
-                      .receipt-body table { width: 100%; border-collapse: collapse; }
-                      .receipt-body th, .receipt-body td { border-bottom: 1px dotted #ccc; padding: 5px 0; text-align: left; }
-                      .receipt-total { margin-top: 10px; text-align: right; }
-                      .receipt-footer { text-align: center; margin-top: 20px; }
-                    </style>
-                  </head>
-                  <body>
-                    ${html}
-                    <script>
-                      (async function() {
-                        try { if (document.fonts && document.fonts.ready) { await document.fonts.ready; } } catch(e){}
-                        requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
-                      })();
-                    <\/script>
-                  </body>
-                </html>
-            `);
-            w.document.close();
-        } catch (e) {
-            // Se falhar, o usuário pode tentar o botão de imprimir normal
-        }
+        const pageCss = printFormat === '80mm'
+            ? `@page { size: 80mm auto; margin: 0; } #sheet { width:80mm; margin:0 auto; }`
+            : `@page { size: A4; margin: 12mm; } #sheet { max-width: 800px; margin:0 auto; }`;
+
+        const html = `<!doctype html>
+        <html>
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>Recibo #${order.id.slice(-6)}</title>
+            <style>
+              html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+              body { margin:0; font-family: 'Courier New', Courier, monospace; color:#000; }
+              ${pageCss}
+              #sheet { background:#fff; padding:10px; }
+              h2 { text-align:center; margin:0 0 8px 0; }
+              table { width:100%; border-collapse:collapse; }
+              .total { text-align:right; margin-top:10px; font-weight:bold; }
+              .footer { text-align:center; margin-top:18px; }
+              @media print { body * { visibility: visible !important; } }
+            </style>
+          </head>
+          <body>
+            <div id="sheet">
+              <h2>Recibo</h2>
+              <p>Pedido #${order.id.slice(-6)}</p>
+              <p><strong>Cliente:</strong> ${order.customer.name}<br/>
+                 <strong>Endereço:</strong> ${order.customer.address}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th style="text-align:left">Qtd</th>
+                    <th style="text-align:left">Produto</th>
+                    <th style="text-align:right">Preço Unit.</th>
+                    <th style="text-align:right">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${itemsRows}
+                </tbody>
+              </table>
+              <div class="total">Total a Pagar: ${currency(order.total)}</div>
+              <div class="footer">Obrigado pela sua preferência!</div>
+            </div>
+            <script>
+              window.addEventListener('load', function(){
+                setTimeout(function(){ window.print(); }, 100);
+              });
+              window.addEventListener('afterprint', function(){ window.close(); });
+            </script>
+          </body>
+        </html>`;
+
+        win.document.open();
+        win.document.write(html);
+        win.document.close();
+        win.focus();
     };
+
+
 
     const handleShareWhatsApp = () => {
         const itemsText = order.items.map(item => 
@@ -159,7 +208,7 @@ Obrigado pela sua preferência!
                                 <span>{order.customer.address}</span>
                             </div>
                             <a 
-                                href={`https://wa.me/${order.customer.whatsapp}`} 
+                                href={`https://wa.me/${order.customer.whatsapp}`}
                                 target="_blank" 
                                 rel="noopener noreferrer" 
                                 className="inline-flex items-center space-x-3 text-green-500 hover:text-green-600"
@@ -241,49 +290,50 @@ Obrigado pela sua preferência!
                     </div>
 
                     {/* Save and Print Buttons */}
-                    <div className="mt-8 pt-6 border-t dark:border-gray-600 flex flex-col sm:flex-row-reverse gap-3">
+                    <div className="mt-8 pt-6 border-t dark:border-gray-600 flex flex-col md:flex-row md:flex-wrap md:justify-between gap-3">
                         <button 
                             onClick={handleSave}
-                            className="w-full sm:w-auto px-6 py-2.5 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            className="w-full md:w-auto min-w-[180px] px-6 py-2.5 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                             disabled={currentStatus === order.status && currentPaymentStatus === order.payment_status}
                         >
                             Salvar Alterações
                         </button>
                         <button 
                             onClick={handlePrint}
-                            className="w-full sm:w-auto px-6 py-2.5 bg-gray-500 text-white font-bold rounded-lg hover:bg-gray-600 transition-colors"
+                            className="w-full md:w-auto min-w-[180px] px-6 py-2.5 bg-gray-500 text-white font-bold rounded-lg hover:bg-gray-600 transition-colors"
                         >
                             Imprimir Recibo
                         </button>
                         <button 
+                            onClick={handlePrintNewWindow}
+                            className="w-full md:w-auto min-w-[180px] px-6 py-2.5 bg-gray-500 text-white font-bold rounded-lg hover:bg-gray-600 transition-colors"
+                        >
+                            Imprimir (Nova Janela)
+                        </button>
+                        <div className="w-full md:w-auto">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Formato da Página</label>
+                            <select
+                                value={printFormat}
+                                onChange={(e) => setPrintFormat(e.target.value as 'A4' | '80mm')}
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block w-full md:w-auto md:min-w-[220px] p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-500 dark:focus:border-purple-500"
+                            >
+                                <option value="A4">A4</option>
+                                <option value="80mm">Térmico 80mm</option>
+                            </select>
+                        </div>
+                        <button 
                             onClick={handleShareWhatsApp}
-                            className="w-full sm:w-auto px-6 py-2.5 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                            className="w-full md:w-auto min-w-[180px] px-6 py-2.5 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
                         >
                             <FaShare /> Compartilhar
                         </button>
                     </div>
                 </div>
             </div>
-            {isPrinting && (
-                <div className="receipt-overlay fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-start overflow-y-auto py-4" onClick={() => setIsPrinting(false)}>
-                    <div onClick={(e) => e.stopPropagation()} className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-4 sm:p-6 w-full max-w-md m-4">
-                        <Receipt order={order} />
-                        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <button onClick={() => setIsPrinting(false)} className="w-full px-4 py-2 bg-gray-200 text-gray-800 rounded-lg">Fechar</button>
-                            <button onClick={() => {
-                                try {
-                                    window.print();
-                                } catch (e) {}
-                            }} className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg">Imprimir</button>
-                            <button onClick={openPrintWindowFromReceipt} className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg">Imprimir (Compatibilidade PDF)</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-            {/* Cópia apenas para impressão (fora do overlay) */}
-            {isPrinting && (
+            {/* Recibo oculto (fora de vista) para impressão */}
+            <div id="receipt-to-print" style={{ position: 'absolute', left: '-10000px', top: 0, width: 0, height: 0, overflow: 'hidden' }}>
                 <Receipt order={order} />
-            )}
+            </div>
         </>
     );
 };
