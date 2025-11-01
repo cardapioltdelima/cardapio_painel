@@ -70,21 +70,104 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
         document.head.appendChild(style);
     };
 
-    const handlePrint = async () => {
-        // Monta estilo dinâmico do formato escolhido (A4/80mm)
-        applyPrintFormatStyle(printFormat);
+    const handleSaveAsPDF = () => {
+        // Usa a mesma abordagem de nova janela, mas com instruções para salvar como PDF
+        const win = window.open('', '_blank');
+        if (!win) {
+            alert('Não foi possível abrir uma nova janela. Verifique se o bloqueador de pop-ups está desativado.');
+            return;
+        }
 
-        // Aguarda fontes e layout
-        try {
-            if ((document as any).fonts && (document as any).fonts.ready) {
-                await (document as any).fonts.ready;
-            }
-        } catch {}
-        await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
-        await new Promise<void>(r => setTimeout(() => r(), 150));
+        const currency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const itemsRows = order.items.map(item => `
+            <tr>
+              <td style="padding:4px;border-bottom:1px dotted #ccc">${item.quantity}</td>
+              <td style="padding:4px;border-bottom:1px dotted #ccc">${item.productName}</td>
+              <td style="padding:4px;border-bottom:1px dotted #ccc;text-align:right">${currency(item.price)}</td>
+              <td style="padding:4px;border-bottom:1px dotted #ccc;text-align:right">${currency(item.quantity * item.price)}</td>
+            </tr>
+        `).join('');
 
-        // Chama impressão sem substituir o body (evita página em branco no desktop)
-        window.print();
+        const pageCss = printFormat === '80mm'
+            ? `@page { size: 80mm auto; margin: 0; } #sheet { width:80mm; margin:0 auto; }`
+            : `@page { size: A4; margin: 12mm; } #sheet { max-width: 800px; margin:0 auto; }`;
+
+        const html = `<!doctype html>
+        <html>
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>Recibo #${order.id.slice(-6)}</title>
+            <style>
+              html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+              body { margin:0; font-family: 'Courier New', Courier, monospace; color:#000; }
+              ${pageCss}
+              #sheet { background:#fff; padding:10px; }
+              h2 { text-align:center; margin:0 0 8px 0; }
+              table { width:100%; border-collapse:collapse; }
+              .total { text-align:right; margin-top:10px; font-weight:bold; }
+              .footer { text-align:center; margin-top:18px; }
+              @media print { body * { visibility: visible !important; } }
+              .pdf-instructions {
+                background-color: #f0f8ff;
+                border: 1px solid #4682b4;
+                padding: 15px;
+                margin: 20px 0;
+                border-radius: 5px;
+                text-align: center;
+                font-family: Arial, sans-serif;
+              }
+              .pdf-instructions h3 {
+                margin-top: 0;
+                color: #4682b4;
+              }
+              .pdf-instructions p {
+                margin-bottom: 5px;
+              }
+              @media print {
+                .pdf-instructions {
+                  display: none;
+                }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="pdf-instructions">
+              <h3>Instruções para Salvar como PDF</h3>
+              <p>1. Clique no botão de impressão abaixo ou pressione Ctrl+P (ou Cmd+P no Mac)</p>
+              <p>2. Na janela de impressão, selecione "Salvar como PDF" ou "Microsoft Print to PDF"</p>
+              <p>3. Escolha o local para salvar o arquivo e clique em Salvar</p>
+              <button onclick="window.print()" style="background:#4682b4; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; margin-top:10px;">Abrir Janela de Impressão</button>
+            </div>
+            
+            <div id="sheet">
+              <h2>Recibo</h2>
+              <p>Pedido #${order.id.slice(-6)}</p>
+              <p><strong>Cliente:</strong> ${order.customer.name}<br/>
+                 <strong>Endereço:</strong> ${order.customer.address}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th style="text-align:left">Qtd</th>
+                    <th style="text-align:left">Produto</th>
+                    <th style="text-align:right">Preço Unit.</th>
+                    <th style="text-align:right">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${itemsRows}
+                </tbody>
+              </table>
+              <div class="total">Total a Pagar: ${currency(order.total)}</div>
+              <div class="footer">Obrigado pela sua preferência!</div>
+            </div>
+          </body>
+        </html>`;
+
+        win.document.open();
+        win.document.write(html);
+        win.document.close();
+        win.focus();
     };
 
     // Fallback: imprimir em nova janela (isola CSS/HTML e evita interferência do DOM atual)
@@ -299,10 +382,10 @@ Obrigado pela sua preferência!
                             Salvar Alterações
                         </button>
                         <button 
-                            onClick={handlePrint}
-                            className="w-full md:w-auto min-w-[180px] px-6 py-2.5 bg-gray-500 text-white font-bold rounded-lg hover:bg-gray-600 transition-colors"
+                            onClick={handleSaveAsPDF}
+                            className="w-full md:w-auto min-w-[180px] px-6 py-2.5 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors"
                         >
-                            Imprimir Recibo
+                            Salvar como PDF
                         </button>
                         <button 
                             onClick={handlePrintNewWindow}
