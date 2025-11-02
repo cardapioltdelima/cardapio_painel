@@ -81,16 +81,29 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
         const currency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         const itemsRows = order.items.map(item => `
             <tr>
-              <td style="padding:4px;border-bottom:1px dotted #ccc">${item.quantity}</td>
-              <td style="padding:4px;border-bottom:1px dotted #ccc">${item.productName}</td>
-              <td style="padding:4px;border-bottom:1px dotted #ccc;text-align:right">${currency(item.price)}</td>
-              <td style="padding:4px;border-bottom:1px dotted #ccc;text-align:right">${currency(item.quantity * item.price)}</td>
+              <td style="padding:6px;border-bottom:1px dotted #ccc">${item.quantity}</td>
+              <td style="padding:6px;border-bottom:1px dotted #ccc">${item.productName}</td>
+              <td style="padding:6px;border-bottom:1px dotted #ccc;text-align:right">${currency(item.price)}</td>
+              <td style="padding:6px;border-bottom:1px dotted #ccc;text-align:right">${currency(item.quantity * item.price)}</td>
             </tr>
         `).join('');
 
+        // CSS específico para cada formato de impressão
         const pageCss = printFormat === '80mm'
-            ? `@page { size: 80mm auto; margin: 0; } #sheet { width:80mm; margin:0 auto; }`
-            : `@page { size: A4; margin: 12mm; } #sheet { max-width: 800px; margin:0 auto; }`;
+            ? `@page { size: 80mm auto; margin: 5mm; } 
+               #sheet { width:70mm; margin:0 auto; }
+               body { font-size: 14px; }
+               h2 { font-size: 18px; }
+               table { font-size: 14px; }
+               .total { font-size: 16px; }
+               th, td { padding: 6px 4px; }`
+            : `@page { size: A4; margin: 15mm; } 
+               #sheet { max-width: 800px; margin:0 auto; }
+               body { font-size: 16px; }
+               h2 { font-size: 22px; }
+               table { font-size: 16px; }
+               .total { font-size: 18px; }
+               th, td { padding: 8px 6px; }`;
 
         const html = `<!doctype html>
         <html>
@@ -100,14 +113,27 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
             <title>Recibo #${order.id.slice(-6)}</title>
             <style>
               html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-              body { margin:0; font-family: 'Courier New', Courier, monospace; color:#000; }
+              body { 
+                margin:0; 
+                font-family: 'Courier New', Courier, monospace; 
+                color:#000; 
+                line-height: 1.5;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
               ${pageCss}
-              #sheet { background:#fff; padding:10px; }
-              h2 { text-align:center; margin:0 0 8px 0; }
+              #sheet { background:#fff; padding:15px; }
+              h2 { text-align:center; margin:0 0 10px 0; font-weight: bold; }
+              p { margin: 8px 0; }
               table { width:100%; border-collapse:collapse; }
-              .total { text-align:right; margin-top:10px; font-weight:bold; }
-              .footer { text-align:center; margin-top:18px; }
-              @media print { body * { visibility: visible !important; } }
+              th { font-weight: bold; border-bottom: 2px solid #000; }
+              td { border-bottom: 1px dotted #ccc; }
+              .total { text-align:right; margin-top:15px; font-weight:bold; }
+              .footer { text-align:center; margin-top:20px; font-weight: bold; }
+              @media print { 
+                body * { visibility: visible !important; } 
+                @page { color-adjust: exact; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+              }
               .pdf-instructions {
                 background-color: #f0f8ff;
                 border: 1px solid #4682b4;
@@ -120,9 +146,16 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
               .pdf-instructions h3 {
                 margin-top: 0;
                 color: #4682b4;
+                font-size: 18px;
               }
               .pdf-instructions p {
                 margin-bottom: 5px;
+                font-size: 16px;
+              }
+              .pdf-instructions button {
+                font-size: 16px;
+                font-weight: bold;
+                padding: 10px 20px;
               }
               @media print {
                 .pdf-instructions {
@@ -137,7 +170,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
               <p>1. Clique no botão de impressão abaixo ou pressione Ctrl+P (ou Cmd+P no Mac)</p>
               <p>2. Na janela de impressão, selecione "Salvar como PDF" ou "Microsoft Print to PDF"</p>
               <p>3. Escolha o local para salvar o arquivo e clique em Salvar</p>
-              <button onclick="window.print()" style="background:#4682b4; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; margin-top:10px;">Abrir Janela de Impressão</button>
+              <button onclick="window.print()" style="background:#4682b4; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer; margin-top:10px;">Abrir Janela de Impressão</button>
             </div>
             
             <div id="sheet">
@@ -178,16 +211,29 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
         const currency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         const itemsRows = order.items.map(item => `
             <tr>
-              <td style="padding:4px;border-bottom:1px dotted #ccc">${item.quantity}</td>
-              <td style="padding:4px;border-bottom:1px dotted #ccc">${item.productName}</td>
-              <td style="padding:4px;border-bottom:1px dotted #ccc;text-align:right">${currency(item.price)}</td>
-              <td style="padding:4px;border-bottom:1px dotted #ccc;text-align:right">${currency(item.quantity * item.price)}</td>
+              <td style="padding:6px;border-bottom:1px dotted #ccc">${item.quantity}</td>
+              <td style="padding:6px;border-bottom:1px dotted #ccc">${item.productName}</td>
+              <td style="padding:6px;border-bottom:1px dotted #ccc;text-align:right">${currency(item.price)}</td>
+              <td style="padding:6px;border-bottom:1px dotted #ccc;text-align:right">${currency(item.quantity * item.price)}</td>
             </tr>
         `).join('');
 
+        // CSS específico para cada formato de impressão
         const pageCss = printFormat === '80mm'
-            ? `@page { size: 80mm auto; margin: 0; } #sheet { width:80mm; margin:0 auto; }`
-            : `@page { size: A4; margin: 12mm; } #sheet { max-width: 800px; margin:0 auto; }`;
+            ? `@page { size: 80mm auto; margin: 5mm; } 
+               #sheet { width:70mm; margin:0 auto; }
+               body { font-size: 14px; }
+               h2 { font-size: 18px; }
+               table { font-size: 14px; }
+               .total { font-size: 16px; }
+               th, td { padding: 6px 4px; }`
+            : `@page { size: A4; margin: 15mm; } 
+               #sheet { max-width: 800px; margin:0 auto; }
+               body { font-size: 16px; }
+               h2 { font-size: 22px; }
+               table { font-size: 16px; }
+               .total { font-size: 18px; }
+               th, td { padding: 8px 6px; }`;
 
         const html = `<!doctype html>
         <html>
@@ -197,14 +243,27 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
             <title>Recibo #${order.id.slice(-6)}</title>
             <style>
               html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-              body { margin:0; font-family: 'Courier New', Courier, monospace; color:#000; }
+              body { 
+                margin:0; 
+                font-family: 'Courier New', Courier, monospace; 
+                color:#000; 
+                line-height: 1.5;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
               ${pageCss}
-              #sheet { background:#fff; padding:10px; }
-              h2 { text-align:center; margin:0 0 8px 0; }
+              #sheet { background:#fff; padding:15px; }
+              h2 { text-align:center; margin:0 0 10px 0; font-weight: bold; }
+              p { margin: 8px 0; }
               table { width:100%; border-collapse:collapse; }
-              .total { text-align:right; margin-top:10px; font-weight:bold; }
-              .footer { text-align:center; margin-top:18px; }
-              @media print { body * { visibility: visible !important; } }
+              th { font-weight: bold; border-bottom: 2px solid #000; }
+              td { border-bottom: 1px dotted #ccc; }
+              .total { text-align:right; margin-top:15px; font-weight:bold; }
+              .footer { text-align:center; margin-top:20px; font-weight: bold; }
+              @media print { 
+                body * { visibility: visible !important; } 
+                @page { color-adjust: exact; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+              }
             </style>
           </head>
           <body>
