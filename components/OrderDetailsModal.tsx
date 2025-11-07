@@ -115,21 +115,23 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
               html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
               body { 
                 margin:0; 
-                font-family: 'Courier New', Courier, monospace; 
-                color:#000; 
-                line-height: 1.5;
+                font-family: 'Courier New', Courier, monospace !important; 
+                color:#000 !important; 
+                line-height: 1.5 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+                font-weight: bold !important;
+                font-size: 16px !important;
               }
               ${pageCss}
               #sheet { background:#fff; padding:15px; }
-              h2 { text-align:center; margin:0 0 10px 0; font-weight: bold; }
-              p { margin: 8px 0; }
+              h2 { text-align:center; margin:0 0 10px 0; font-weight: bold !important; font-size: 20px !important; }
+              p { margin: 8px 0; font-weight: bold !important; font-size: 16px !important; }
               table { width:100%; border-collapse:collapse; }
-              th { font-weight: bold; border-bottom: 2px solid #000; }
-              td { border-bottom: 1px dotted #ccc; }
-              .total { text-align:right; margin-top:15px; font-weight:bold; }
-              .footer { text-align:center; margin-top:20px; font-weight: bold; }
+              th { font-weight: bold !important; border-bottom: 2px solid #000; font-size: 16px !important; }
+              td { border-bottom: 1px dotted #ccc; font-weight: bold !important; font-size: 16px !important; }
+              .total { text-align:right; margin-top:15px; font-weight:bold !important; font-size: 18px !important; }
+              .footer { text-align:center; margin-top:20px; font-weight: bold !important; font-size: 16px !important; }
               @media print { 
                 body * { visibility: visible !important; } 
                 @page { color-adjust: exact; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
@@ -245,21 +247,23 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
               html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
               body { 
                 margin:0; 
-                font-family: 'Courier New', Courier, monospace; 
-                color:#000; 
-                line-height: 1.5;
+                font-family: 'Courier New', Courier, monospace !important; 
+                color:#000 !important; 
+                line-height: 1.5 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+                font-weight: bold !important;
+                font-size: 16px !important;
               }
               ${pageCss}
               #sheet { background:#fff; padding:15px; }
-              h2 { text-align:center; margin:0 0 10px 0; font-weight: bold; }
-              p { margin: 8px 0; }
+              h2 { text-align:center; margin:0 0 10px 0; font-weight: bold !important; font-size: 20px !important; }
+              p { margin: 8px 0; font-weight: bold !important; font-size: 16px !important; }
               table { width:100%; border-collapse:collapse; }
-              th { font-weight: bold; border-bottom: 2px solid #000; }
-              td { border-bottom: 1px dotted #ccc; }
-              .total { text-align:right; margin-top:15px; font-weight:bold; }
-              .footer { text-align:center; margin-top:20px; font-weight: bold; }
+              th { font-weight: bold !important; border-bottom: 2px solid #000; font-size: 16px !important; }
+              td { border-bottom: 1px dotted #ccc; font-weight: bold !important; font-size: 16px !important; }
+              .total { text-align:right; margin-top:15px; font-weight:bold !important; font-size: 18px !important; }
+              .footer { text-align:center; margin-top:20px; font-weight: bold !important; font-size: 16px !important; }
               @media print { 
                 body * { visibility: visible !important; } 
                 @page { color-adjust: exact; print-color-adjust: exact; -webkit-print-color-adjust: exact; }

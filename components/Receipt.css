@@ -1,18 +1,21 @@
 .receipt-container {
     display: none;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Courier New', Courier, monospace !important;
     width: 300px;
     margin: 0 auto;
     padding: 10px;
     border: 1px solid #ccc;
     background-color: white;
     color: black;
+    font-weight: bold !important; /* Todo texto em negrito */
+    font-size: 16px !important; /* Aumentando fonte base */
 }
 
 .receipt-header h2 {
     text-align: center;
-    font-size: 1.2em;
+    font-size: 1.4em !important; /* Aumentado de 1.2em para 1.4em */
     margin-bottom: 10px;
+    font-weight: bold !important;
 }
 
 .receipt-body table {
@@ -25,16 +28,22 @@
     border-bottom: 1px dotted #ccc;
     padding: 5px 0;
     text-align: left;
+    font-weight: bold !important; /* Garantindo negrito em tabela */
+    font-size: 14px !important;
 }
 
 .receipt-total {
     margin-top: 10px;
     text-align: right;
+    font-weight: bold !important;
+    font-size: 16px !important;
 }
 
 .receipt-footer {
     text-align: center;
     margin-top: 20px;
+    font-weight: bold !important;
+    font-size: 14px !important;
 }
 
 /* Preview em tela (mobile/tablet) */
@@ -47,6 +56,8 @@
     border: 1px solid #ccc;
     background-color: white;
     color: black;
+    font-weight: bold; /* Todo texto em negrito */
+    font-size: 14px; /* Aumentando fonte base */
 }
 
 @media print {
