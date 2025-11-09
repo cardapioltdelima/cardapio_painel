@@ -88,16 +88,18 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
             </tr>
         `).join('');
 
-        // CSS específico para cada formato de impressão
+        // CSS específico para cada formato de impressão - Ajustado para evitar corte
         const pageCss = printFormat === '80mm'
-            ? `@page { size: 80mm auto; margin: 5mm; } 
-               #sheet { width:70mm; margin:0 auto; }
+            ? `@page { size: 80mm auto; margin: 2mm 1mm; } 
+               #sheet { width:76mm; margin:0 auto; padding: 5px; }
                body { font-size: 14px; }
-               h2 { font-size: 18px; }
-               table { font-size: 14px; }
-               .total { font-size: 16px; }
-               th, td { padding: 6px 4px; }`
-            : `@page { size: A4; margin: 15mm; } 
+               h2 { font-size: 18px; margin: 5px 0; }
+               table { font-size: 14px; width: 100%; }
+               .total { font-size: 16px; margin: 10px 0; }
+               th, td { padding: 4px 2px; font-size: 12px; }
+               p { margin: 4px 0; font-size: 12px; }
+               .footer { margin: 10px 0; font-size: 12px; }`
+            : `@page { size: A4; margin: 10mm; } 
                #sheet { max-width: 800px; margin:0 auto; }
                body { font-size: 16px; }
                h2 { font-size: 22px; }
@@ -220,16 +222,18 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
             </tr>
         `).join('');
 
-        // CSS específico para cada formato de impressão
+        // CSS específico para cada formato de impressão - Ajustado para evitar corte
         const pageCss = printFormat === '80mm'
-            ? `@page { size: 80mm auto; margin: 5mm; } 
-               #sheet { width:70mm; margin:0 auto; }
+            ? `@page { size: 80mm auto; margin: 2mm 1mm; } 
+               #sheet { width:76mm; margin:0 auto; padding: 5px; }
                body { font-size: 14px; }
-               h2 { font-size: 18px; }
-               table { font-size: 14px; }
-               .total { font-size: 16px; }
-               th, td { padding: 6px 4px; }`
-            : `@page { size: A4; margin: 15mm; } 
+               h2 { font-size: 18px; margin: 5px 0; }
+               table { font-size: 14px; width: 100%; }
+               .total { font-size: 16px; margin: 10px 0; }
+               th, td { padding: 4px 2px; font-size: 12px; }
+               p { margin: 4px 0; font-size: 12px; }
+               .footer { margin: 10px 0; font-size: 12px; }`
+            : `@page { size: A4; margin: 10mm; } 
                #sheet { max-width: 800px; margin:0 auto; }
                body { font-size: 16px; }
                h2 { font-size: 22px; }

@@ -63,6 +63,12 @@
 @media print {
     html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
+    /* Configurações de página para evitar corte */
+    @page {
+        margin: 2mm 1mm !important;
+        size: auto !important;
+    }
+
     /* Esconde todo o resto */
     body * { visibility: hidden !important; }
 
@@ -82,6 +88,9 @@
         padding: 0 !important;
         left: auto !important;
         top: auto !important;
+        width: 100% !important;
+        max-width: 76mm !important;
+        page-break-inside: avoid !important;
     }
 
     /* Garante que o wrapper não oculte/recorte o recibo na impressão */
@@ -97,12 +106,28 @@
         padding: 0 !important;
         border: none !important;
         background: transparent !important;
+        page-break-inside: avoid !important;
     }
 
     /* Evita interferência do overlay/backdrop */
     .receipt-overlay, .modal-backdrop, .overlay {
         display: none !important;
         visibility: hidden !important;
+    }
+
+    /* Ajustes específicos para impressão térmica 80mm */
+    .receipt-container {
+        width: 76mm !important;
+        margin: 0 !important;
+        padding: 2mm !important;
+        page-break-inside: avoid !important;
+        page-break-after: avoid !important;
+    }
+
+    /* Evita quebra de linha em lugares inadequados */
+    .receipt-total, .receipt-footer {
+        page-break-inside: avoid !important;
+        page-break-before: avoid !important;
     }
 }
 
