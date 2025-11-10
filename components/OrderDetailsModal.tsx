@@ -107,6 +107,15 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
                .total { font-size: 18px; }
                th, td { padding: 8px 6px; }`;
 
+        const schedulingHtml = order.data_agendamento
+            ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px dotted #ccc;">
+                 <p><strong>Agendamento:</strong></p>
+                 <p>Data: ${new Date(order.data_agendamento).toLocaleDateString('pt-BR')}</p>
+                 <p>Turno: ${order.turno}</p>
+                 <p>Horário: ${order.horario_agendamento}</p>
+               </div>`
+            : '';
+
         const html = `<!doctype html>
         <html>
           <head>
@@ -182,6 +191,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
               <p>Pedido #${order.id.slice(-6)}</p>
               <p><strong>Cliente:</strong> ${order.customer.name}<br/>
                  <strong>Endereço:</strong> ${order.customer.address}</p>
+              ${schedulingHtml}
               <table>
                 <thead>
                   <tr>
@@ -241,6 +251,15 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
                .total { font-size: 18px; }
                th, td { padding: 8px 6px; }`;
 
+        const schedulingHtml = order.data_agendamento
+            ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px dotted #ccc;">
+                 <p><strong>Agendamento:</strong></p>
+                 <p>Data: ${new Date(order.data_agendamento).toLocaleDateString('pt-BR')}</p>
+                 <p>Turno: ${order.turno}</p>
+                 <p>Horário: ${order.horario_agendamento}</p>
+               </div>`
+            : '';
+
         const html = `<!doctype html>
         <html>
           <head>
@@ -280,6 +299,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
               <p>Pedido #${order.id.slice(-6)}</p>
               <p><strong>Cliente:</strong> ${order.customer.name}<br/>
                  <strong>Endereço:</strong> ${order.customer.address}</p>
+              ${schedulingHtml}
               <table>
                 <thead>
                   <tr>

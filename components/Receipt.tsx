@@ -19,6 +19,14 @@ const Receipt: React.FC<ReceiptProps> = ({ order }) => {
                     <p><strong>Cliente:</strong> {order.customer.name}</p>
                     <p><strong>Endereço:</strong> {order.customer.address}</p>
                 </div>
+                {order.data_agendamento && (
+                    <div className="scheduling-info">
+                        <p><strong>Agendamento:</strong></p>
+                        <p>Data: {new Date(order.data_agendamento).toLocaleDateString('pt-BR')}</p>
+                        <p>Turno: {order.turno}</p>
+                        <p>Horário: {order.horario_agendamento}</p>
+                    </div>
+                )}
                 <div className="order-items">
                     <table>
                         <thead>
