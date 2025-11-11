@@ -22,7 +22,7 @@ const Receipt: React.FC<ReceiptProps> = ({ order }) => {
                 {order.data_agendamento && (
                     <div className="scheduling-info">
                         <p><strong>Agendamento:</strong></p>
-                        <p>Data: {new Date(order.data_agendamento).toLocaleDateString('pt-BR')}</p>
+                        <p>Data: {new Date(order.data_agendamento).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</p>
                         <p>Turno: {order.turno}</p>
                         <p>Horário: {order.horario_agendamento}</p>
                     </div>

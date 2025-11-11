@@ -87,7 +87,7 @@ const Orders: React.FC<OrdersProps> = ({ orders, products, updateOrderStatus, up
                             <p className="text-sm text-gray-600 dark:text-gray-300">Total: <span className="font-medium text-gray-800 dark:text-gray-100">{order.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span></p>
                             {order.data_agendamento && (
                                 <>
-                                    <p className="text-sm text-gray-600 dark:text-gray-300">Data Agendada: <span className="font-medium text-gray-800 dark:text-gray-100">{new Date(order.data_agendamento).toLocaleDateString('pt-BR')}</span></p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-300">Data Agendada: <span className="font-medium text-gray-800 dark:text-gray-100">{new Date(order.data_agendamento).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span></p>
                                     <p className="text-sm text-gray-600 dark:text-gray-300">Turno: <span className="font-medium text-gray-800 dark:text-gray-100">{order.turno}</span></p>
                                     <p className="text-sm text-gray-600 dark:text-gray-300">Horário: <span className="font-medium text-gray-800 dark:text-gray-100">{order.horario_agendamento}</span></p>
                                 </>
@@ -134,7 +134,7 @@ const Orders: React.FC<OrdersProps> = ({ orders, products, updateOrderStatus, up
                                 <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">#{order.id.slice(-6)}</td>
                                 <td className="px-6 py-4">{order.customer.name}</td>
                                 <td className="px-6 py-4">{new Date(order.createdAt).toLocaleDateString('pt-BR')}</td>
-                                <td className="px-6 py-4">{order.data_agendamento ? new Date(order.data_agendamento).toLocaleDateString('pt-BR') : 'N/A'}</td>
+                                <td className="px-6 py-4">{order.data_agendamento ? new Date(order.data_agendamento).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'N/A'}</td>
                                 <td className="px-6 py-4">{order.turno || 'N/A'}</td>
                                 <td className="px-6 py-4">{order.horario_agendamento || 'N/A'}</td>
                                 <td className="px-6 py-4">{order.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>

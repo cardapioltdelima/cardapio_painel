@@ -71,34 +71,34 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
     };
 
     const handleSaveAsPDF = () => {
-        // Usa a mesma abordagem de nova janela, mas com instruções para salvar como PDF
-        const win = window.open('', '_blank');
-        if (!win) {
-            alert('Não foi possível abrir uma nova janela. Verifique se o bloqueador de pop-ups está desativado.');
-            return;
-        }
-
-        const currency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        const itemsRows = order.items.map(item => `
-            <tr>
-              <td style="padding:6px;border-bottom:1px dotted #ccc">${item.quantity}</td>
-              <td style="padding:6px;border-bottom:1px dotted #ccc">${item.productName}</td>
-              <td style="padding:6px;border-bottom:1px dotted #ccc;text-align:right">${currency(item.price)}</td>
-              <td style="padding:6px;border-bottom:1px dotted #ccc;text-align:right">${currency(item.quantity * item.price)}</td>
-            </tr>
-        `).join('');
-
-        // CSS específico para cada formato de impressão - Ajustado para evitar corte
-        const pageCss = printFormat === '80mm'
-            ? `@page { size: 80mm auto; margin: 2mm 1mm; } 
-               #sheet { width:76mm; margin:0 auto; padding: 5px; }
-               body { font-size: 14px; }
-               h2 { font-size: 18px; margin: 5px 0; }
-               table { font-size: 14px; width: 100%; }
-               .total { font-size: 16px; margin: 10px 0; }
-               th, td { padding: 4px 2px; font-size: 12px; }
-               p { margin: 4px 0; font-size: 12px; }
-               .footer { margin: 10px 0; font-size: 12px; }`
+                // Usa a mesma abordagem de nova janela, mas com instruções para salvar como PDF
+                const win = window.open('', '_blank');
+                if (!win) {
+                    alert('Não foi possível abrir uma nova janela. Verifique se o bloqueador de pop-ups está desativado.');
+                    return;
+                }
+        
+                const currency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                const itemsRows = order.items.map(item => `
+                    <tr>
+                      <td style="padding:6px;border-bottom:1px dotted #ccc">${item.quantity}</td>
+                      <td style="padding:6px;border-bottom:1px dotted #ccc">${item.productName}</td>
+                      <td style="padding:6px;border-bottom:1px dotted #ccc;text-align:right">${currency(item.price)}</td>
+                      <td style="padding:6px;border-bottom:1px dotted #ccc;text-align:right">${currency(item.quantity * item.price)}</td>
+                    </tr>
+                `).join('');
+        
+                // CSS específico para cada formato de impressão - Ajustado para evitar corte
+                const pageCss = printFormat === '80mm'
+                    ? `@page { size: 80mm auto; margin: 2mm 1mm; }
+                                      #sheet { width:76mm; margin:0 auto; padding: 5px; box-sizing: border-box; }
+                                      body { font-size: 14px !important; }
+                                      h2 { font-size: 18px !important; margin: 5px 0; }
+                                      table { font-size: 12px !important; width: 100%; }
+                                      .total { font-size: 12px !important; margin: 5px 0 !important; }
+                                      th, td { padding: 4px 2px; font-size: 10px !important; }
+                                      p { margin: 4px 0; font-size: 14px !important; }
+                                      .footer { margin: 10px 0; font-size: 10px !important; }`
             : `@page { size: A4; margin: 10mm; } 
                #sheet { max-width: 800px; margin:0 auto; }
                body { font-size: 16px; }
@@ -110,7 +110,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
         const schedulingHtml = order.data_agendamento
             ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px dotted #ccc;">
                  <p><strong>Agendamento:</strong></p>
-                 <p>Data: ${new Date(order.data_agendamento).toLocaleDateString('pt-BR')}</p>
+                 <p>Data: ${new Date(order.data_agendamento).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</p>
                  <p>Turno: ${order.turno}</p>
                  <p>Horário: ${order.horario_agendamento}</p>
                </div>`
@@ -205,7 +205,10 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
                   ${itemsRows}
                 </tbody>
               </table>
-              <div class="total">Total a Pagar: ${currency(order.total)}</div>
+              <div class="total" style="display: flex; justify-content: space-between;">
+                <span>Total a Pagar:</span>
+                <span>${currency(order.total)}</span>
+              </div>
               <div class="footer">Obrigado pela sua preferência!</div>
             </div>
           </body>
@@ -235,14 +238,14 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
         // CSS específico para cada formato de impressão - Ajustado para evitar corte
         const pageCss = printFormat === '80mm'
             ? `@page { size: 80mm auto; margin: 2mm 1mm; } 
-               #sheet { width:76mm; margin:0 auto; padding: 5px; }
-               body { font-size: 14px; }
-               h2 { font-size: 18px; margin: 5px 0; }
-               table { font-size: 14px; width: 100%; }
-               .total { font-size: 16px; margin: 10px 0; }
-               th, td { padding: 4px 2px; font-size: 12px; }
-               p { margin: 4px 0; font-size: 12px; }
-               .footer { margin: 10px 0; font-size: 12px; }`
+               #sheet { width:76mm; margin:0 auto; padding: 5px; box-sizing: border-box; }
+               body { font-size: 14px !important; }
+               h2 { font-size: 18px !important; margin: 5px 0; }
+               table { font-size: 12px !important; width: 100%; }
+               .total { font-size: 12px !important; margin: 5px 0 !important; }
+               th, td { padding: 4px 2px; font-size: 10px !important; }
+               p { margin: 4px 0; font-size: 14px !important; }
+               .footer { margin: 10px 0; font-size: 10px !important; }`
             : `@page { size: A4; margin: 10mm; } 
                #sheet { max-width: 800px; margin:0 auto; }
                body { font-size: 16px; }
@@ -254,7 +257,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
         const schedulingHtml = order.data_agendamento
             ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px dotted #ccc;">
                  <p><strong>Agendamento:</strong></p>
-                 <p>Data: ${new Date(order.data_agendamento).toLocaleDateString('pt-BR')}</p>
+                 <p>Data: ${new Date(order.data_agendamento).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</p>
                  <p>Turno: ${order.turno}</p>
                  <p>Horário: ${order.horario_agendamento}</p>
                </div>`
@@ -313,7 +316,10 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, onClose, u
                   ${itemsRows}
                 </tbody>
               </table>
-              <div class="total">Total a Pagar: ${currency(order.total)}</div>
+              <div class="total" style="display: flex; justify-content: space-between;">
+                <span>Total a Pagar:</span>
+                <span>${currency(order.total)}</span>
+              </div>
               <div class="footer">Obrigado pela sua preferência!</div>
             </div>
             <script>
@@ -394,7 +400,7 @@ Obrigado pela sua preferência!
                                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Agendamento</h3>
                                 <div className="flex items-center space-x-3 text-gray-600 dark:text-gray-300">
                                     <FaCalendarAlt className="text-purple-500 flex-shrink-0"/>
-                                    <span>{new Date(order.data_agendamento).toLocaleDateString('pt-BR')}</span>
+                                    <span>{new Date(order.data_agendamento).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>
                                 </div>
                                 <div className="flex items-center space-x-3 text-gray-600 dark:text-gray-300">
                                     <FaClock className="text-purple-500 flex-shrink-0"/>
